@@ -1,0 +1,25 @@
+{
+  "name": "tienda-virtual",
+  "version": "1.0.0",
+  "description": "Creacion de API REST para una tienda virtual",
+  "homepage": "https://github.com/Andreard276/BackEnd_TiendVirtual#readme",
+  "bugs": {
+    "url": "https://github.com/Andreard276/BackEnd_TiendVirtual/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Andreard276/BackEnd_TiendVirtual.git"
+  },
+  "license": "ISC",
+  "author": "Andrea Rodriguez Morales",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "body-parser": "^2.2.2",
+    "express": "^5.2.1",
+    "morgan": "^1.10.1"
+  }
+}
