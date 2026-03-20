@@ -22,7 +22,14 @@ module.exports = {
         type: Sequelize.STRING
       },
       id_categorias: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false,
+        references: {
+          model: 'tbc_categorias',
+          key: 'id'
+        },
+        onUpdate: 'NO ACTION',
+        onDelete: 'NO ACTION'
       },
       createdAt: {
         allowNull: false,

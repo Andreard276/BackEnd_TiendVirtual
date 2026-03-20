@@ -14,10 +14,20 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   tbc_categorias.init({
-    nombre: DataTypes.STRING
+    nombre:{
+      types: DataTypes.STRING(100),
+      allowNull: false,
+    }
   }, {
     sequelize,
     modelName: 'tbc_categorias',
   });
+   tbc_categorias.associate = function(models) {
+    tbc_categorias.belongsTo(models.tbb_productos,
+       {
+      as: 'tbb_producto',
+      foreignKey: 'id_categoria',
+    });
+  };
   return tbc_categorias;
 };

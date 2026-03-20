@@ -14,14 +14,36 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   tbb_productos.init({
-    nombre: DataTypes.STRING,
-    descripcion: DataTypes.STRING,
-    precio: DataTypes.STRING,
-    stock: DataTypes.STRING,
-    id_categorias: DataTypes.STRING
+    nombre:{ 
+      types: DataTypes.STRING(150),
+      allowNull: false
+     },
+    descripcion: {
+      types: DataTypes.STRING,
+      allowNull: false
+    },
+    precio: {
+      types: DataTypes.STRING(10,2),
+      allowNull: false
+    },
+    stock: {
+      types: DataTypes.STRING,
+      defaultValue: 0
+        },
+    id_categorias: {
+      types: DataTypes.STRING,
+      allowNull: false
+    }
   }, {
     sequelize,
     modelName: 'tbb_productos',
   });
+  tbb_productos.associate = function(models) {
+    tbb_productos.belongsTo(models.tbc_categorias,
+       {
+      as: 'tbc_categoria',
+      foreignKey: 'id_categoria',
+    });
+  };
   return tbb_productos;
 };
