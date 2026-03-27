@@ -15,18 +15,17 @@ module.exports = (sequelize, DataTypes) => {
   }
   tbc_categorias.init({
     nombre:{
-      types: DataTypes.STRING(100),
+      type: DataTypes.STRING(100),
       allowNull: false,
     }
   }, {
     sequelize,
     modelName: 'tbc_categorias',
   });
-   tbc_categorias.associate = function(models) {
-    tbc_categorias.belongsTo(models.tbb_productos,
-       {
-      as: 'tbb_producto',
-      foreignKey: 'id_categoria',
+  tbc_categorias.associate = function(models) {
+    tbc_categorias.hasMany(models.tbb_productos, {
+      as: 'productos',
+      foreignKey: 'id_categorias'
     });
   };
   return tbc_categorias;

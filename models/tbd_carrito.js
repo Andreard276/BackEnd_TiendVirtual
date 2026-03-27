@@ -14,30 +14,37 @@ module.exports = (sequelize, DataTypes) => {
     }
   }
   tbd_carrito.init({
-    id_carrito:{ types: DataTypes.STRING, 
-      allowNull: false
-
-     },
-    precio_unitario: { 
-      types: DataTypes.STRING(10,2),
-       allowNull: false 
-      },
-    cantidad: { 
-      types: DataTypes.STRING, 
+    id_usuario: { 
+      type: DataTypes.INTEGER, 
       allowNull: false,
-       defaultValue: '1', 
-       validate: { min: 1 
-        
-       }
-      },
-    id_producto: { 
-
-      types: DataTypes.STRING, 
-      allowNull: false 
+      references: {
+        model: 'tbc_usuarios',
+        key: 'id'
+      }
     },
+    total: { 
+      type: DataTypes.DECIMAL(10,2),
+      allowNull: false,
+      defaultValue: 0
+    },
+    fecha_creacion: { 
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW
+    }
   }, {
     sequelize,
     modelName: 'tbd_carrito',
   });
+  tbd_carrito.associate = function(models) {
+    tbd_carrito.belongsTo(models.tbc_usuario, {
+      as: 'usuario',
+      foreignKey: 'id_usuario'
+    });
+    tbd_carrito.hasMany(models.tbd_carrito_detalle, {
+      as: 'detalles',
+      foreignKey: 'id_carrito'
+    });
+  };
   return tbd_carrito;
 };
