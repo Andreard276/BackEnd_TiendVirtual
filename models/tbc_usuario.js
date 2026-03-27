@@ -44,12 +44,13 @@ module.exports = (sequelize, DataTypes) => {
       defaultValue: 'cliente'
     },
     fecha_registro: {
-      type: DataTypes.Date,
+      type: DataTypes.DATE,
       allowNull: false
     }
   }, {
     sequelize,
     modelName: 'tbc_usuario',
+    tableName: 'tbc_usuarios',
   });
   return tbc_usuario;
 };
