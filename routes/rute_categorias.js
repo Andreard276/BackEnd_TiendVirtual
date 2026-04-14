@@ -1,20 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { tbc_categorias } = require('../models');
+const { tbc_categoriasController } = require('../controllers');
 
-router.get('/api/categorias', async (req, res) => {
-	try {
-		const categorias = await tbc_categorias.findAll({
-			order: [['id', 'ASC']],
-		});
-
-		return res.status(200).json(categorias);
-	} catch (error) {
-		return res.status(500).json({
-			message: 'Error al obtener categorias',
-			error: error.message,
-		});
-	}
-});
+router.post('/api/categorias', tbc_categoriasController.create);
+router.get('/api/categorias', tbc_categoriasController.list);
+router.get('/api/categorias/:id', tbc_categoriasController.find);
+router.put('/api/categorias/:id', tbc_categoriasController.update);
+router.delete('/api/categorias/:id', tbc_categoriasController.delete);
 
 module.exports = router;

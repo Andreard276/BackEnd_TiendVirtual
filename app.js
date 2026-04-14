@@ -6,6 +6,10 @@ require('dotenv').config();
 const http= require('http');
 const app = express ();
 const categoriasRoutes = require('./routes/rute_categorias');
+const usuariosRoutes = require('./routes/rute_usuarios');
+const productosRoutes = require('./routes/rute_productos');
+const carritosRoutes = require('./routes/rute_carritos');
+const carritoDetallesRoutes = require('./routes/rute_carrito_detalles');
 
 app.use(logger('dev'));
 app.use(bodyParser.json());
@@ -16,6 +20,10 @@ app.get('/', (req, res)=> res.status(200).send({
 }));
 
 app.use(categoriasRoutes);
+app.use(usuariosRoutes);
+app.use(productosRoutes);
+app.use(carritosRoutes);
+app.use(carritoDetallesRoutes);
 
 const port = parseInt(process.env.APP_PORT, 10) || 8000;
 app.set('port', port);
