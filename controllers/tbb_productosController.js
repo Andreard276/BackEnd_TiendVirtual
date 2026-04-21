@@ -1,9 +1,32 @@
-const { tbb_productos } = require('../models');
+const { tbb_productos, tbc_categorias } = require('../models');
 
 module.exports = {
   async create(req, res) {
     try {
-      const producto = await tbb_productos.create(req.body);
+      const { nombre, descripcion, precio, stock, id_categorias } = req.body;
+
+      if (!nombre || !descripcion || precio == null || !id_categorias) {
+        return res.status(400).json({
+          message: 'Nombre, descripcion, precio e id_categorias son requeridos',
+        });
+      }
+
+      const categoria = await tbc_categorias.findByPk(id_categorias);
+
+      if (!categoria) {
+        return res.status(404).json({
+          message: 'La categoria indicada no existe',
+        });
+      }
+
+      const producto = await tbb_productos.create({
+        nombre: nombre.trim(),
+        descripcion: descripcion.trim(),
+        precio,
+        stock: stock ?? 0,
+        id_categorias
+      });
+
       return res.status(201).json(producto);
     } catch (error) {
       return res.status(500).json({
@@ -57,7 +80,27 @@ module.exports = {
         });
       }
 
-      await producto.update(req.body);
+      const datos = { ...req.body };
+
+      if (datos.id_categorias) {
+        const categoria = await tbc_categorias.findByPk(datos.id_categorias);
+
+        if (!categoria) {
+          return res.status(404).json({
+            message: 'La categoria indicada no existe',
+          });
+        }
+      }
+
+      if (datos.nombre) {
+        datos.nombre = datos.nombre.trim();
+      }
+
+      if (datos.descripcion) {
+        datos.descripcion = datos.descripcion.trim();
+      }
+
+      await producto.update(datos);
       return res.status(200).json(producto);
     } catch (error) {
       return res.status(500).json({

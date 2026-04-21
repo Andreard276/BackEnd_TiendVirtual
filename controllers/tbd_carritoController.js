@@ -1,9 +1,29 @@
-const { tbd_carrito } = require('../models');
+const { tbd_carrito, tbc_usuario } = require('../models');
 
 module.exports = {
   async create(req, res) {
     try {
-      const carrito = await tbd_carrito.create(req.body);
+      const { id_usuario, total } = req.body;
+
+      if (!id_usuario) {
+        return res.status(400).json({
+          message: 'id_usuario es requerido',
+        });
+      }
+
+      const usuario = await tbc_usuario.findByPk(id_usuario);
+
+      if (!usuario) {
+        return res.status(404).json({
+          message: 'El usuario indicado no existe',
+        });
+      }
+
+      const carrito = await tbd_carrito.create({
+        id_usuario,
+        total: total ?? 0
+      });
+
       return res.status(201).json(carrito);
     } catch (error) {
       return res.status(500).json({
@@ -57,7 +77,19 @@ module.exports = {
         });
       }
 
-      await carrito.update(req.body);
+      const datos = { ...req.body };
+
+      if (datos.id_usuario) {
+        const usuario = await tbc_usuario.findByPk(datos.id_usuario);
+
+        if (!usuario) {
+          return res.status(404).json({
+            message: 'El usuario indicado no existe',
+          });
+        }
+      }
+
+      await carrito.update(datos);
       return res.status(200).json(carrito);
     } catch (error) {
       return res.status(500).json({

@@ -1,10 +1,10 @@
 // src/services/api.js
-const API_URL = 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
 export const api = {
   // Autenticación
   login: async (email, password) => {
-    const response = await fetch(`${API_URL}/api/login`, {
+    const response = await fetch(`${API_URL}/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
@@ -14,7 +14,7 @@ export const api = {
 
   // Usuarios
   registro: async (usuario) => {
-    const response = await fetch(`${API_URL}/api/usuarios`, {
+    const response = await fetch(`${API_URL}/usuarios`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(usuario)
@@ -23,17 +23,17 @@ export const api = {
   },
 
   obtenerUsuarios: async () => {
-    const response = await fetch(`${API_URL}/api/usuarios`);
+    const response = await fetch(`${API_URL}/usuarios`);
     return response.json();
   },
 
   obtenerUsuario: async (id) => {
-    const response = await fetch(`${API_URL}/api/usuarios/${id}`);
+    const response = await fetch(`${API_URL}/usuarios/${id}`);
     return response.json();
   },
 
   actualizarUsuario: async (id, datos) => {
-    const response = await fetch(`${API_URL}/api/usuarios/${id}`, {
+    const response = await fetch(`${API_URL}/usuarios/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(datos)
@@ -42,7 +42,7 @@ export const api = {
   },
 
   eliminarUsuario: async (id) => {
-    const response = await fetch(`${API_URL}/api/usuarios/${id}`, {
+    const response = await fetch(`${API_URL}/usuarios/${id}`, {
       method: 'DELETE'
     });
     return response.json();
@@ -50,13 +50,13 @@ export const api = {
 
   // Productos
   obtenerProductos: async () => {
-    const response = await fetch(`${API_URL}/api/productos`);
+    const response = await fetch(`${API_URL}/productos`);
     return response.json();
   },
 
   // Categorías
   obtenerCategorias: async () => {
-    const response = await fetch(`${API_URL}/api/categorias`);
+    const response = await fetch(`${API_URL}/categorias`);
     return response.json();
   }
 };

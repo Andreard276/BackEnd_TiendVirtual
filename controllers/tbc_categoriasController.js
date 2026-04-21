@@ -3,7 +3,23 @@ const { tbc_categorias } = require('../models');
 module.exports = {
   async create(req, res) {
     try {
-      const categoria = await tbc_categorias.create(req.body);
+      const nombre = req.body.nombre?.trim();
+
+      if (!nombre) {
+        return res.status(400).json({
+          message: 'El nombre de la categoria es requerido',
+        });
+      }
+
+      const categoriaExistente = await tbc_categorias.findOne({ where: { nombre } });
+
+      if (categoriaExistente) {
+        return res.status(409).json({
+          message: 'La categoria ya existe',
+        });
+      }
+
+      const categoria = await tbc_categorias.create({ nombre });
       return res.status(201).json(categoria);
     } catch (error) {
       return res.status(500).json({
@@ -57,7 +73,19 @@ module.exports = {
         });
       }
 
-      await categoria.update(req.body);
+      const nombre = req.body.nombre?.trim();
+
+      if (nombre) {
+        const categoriaExistente = await tbc_categorias.findOne({ where: { nombre } });
+
+        if (categoriaExistente && categoriaExistente.id !== categoria.id) {
+          return res.status(409).json({
+            message: 'La categoria ya existe',
+          });
+        }
+      }
+
+      await categoria.update({ ...req.body, ...(nombre ? { nombre } : {}) });
       return res.status(200).json(categoria);
     } catch (error) {
       return res.status(500).json({

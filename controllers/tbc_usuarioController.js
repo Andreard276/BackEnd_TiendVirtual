@@ -5,33 +5,47 @@ const jwt = require('jsonwebtoken');
 module.exports = {
   async create(req, res) {
     try {
-      console.log('Recibida petición POST /api/usuarios');
-      const { password, ...resto } = req.body;
-      
-      if (!password) {
+      const { nombre, direccion, telefono, email, password, rol } = req.body;
+
+      if (!nombre || !direccion || !telefono || !email || !password) {
         return res.status(400).json({
-          message: 'La contraseña es requerida',
+          message: 'Nombre, direccion, telefono, email y password son requeridos',
         });
       }
-      
-      // Hash de la contraseña
-      console.log('Hasheando contraseña...');
-      const passwordHash = await bcrypt.hash(password, 10);
-      console.log('Contraseña hasheada');
-      
-      console.log('Creando usuario...');
-      const usuario = await tbc_usuario.create({
-        ...resto,
-        password: passwordHash
+
+      const emailNormalizado = email.trim().toLowerCase();
+      const usuarioExistente = await tbc_usuario.findOne({
+        where: { email: emailNormalizado }
       });
-      console.log('Usuario creado:', usuario.id);
-      
-      // No devolver la contraseña en la respuesta
-      const { password: _, ...usuarioSinPassword } = usuario.toJSON();
-      return res.status(201).json(usuarioSinPassword);
+
+      if (usuarioExistente) {
+        return res.status(409).json({
+          message: 'Ya existe un usuario registrado con ese email',
+        });
+      }
+
+      const passwordHash = await bcrypt.hash(password, 10);
+
+      const usuario = await tbc_usuario.create({
+        nombre: nombre.trim(),
+        direccion: direccion.trim(),
+        telefono: telefono.trim(),
+        email: emailNormalizado,
+        password: passwordHash,
+        rol: rol || 'cliente',
+        fecha_registro: new Date()
+      });
+
+      const usuarioData = usuario.toJSON();
+      delete usuarioData.password;
+
+      return res.status(201).json({
+        message: 'Usuario registrado correctamente',
+        usuario: usuarioData,
+      });
     } catch (error) {
-      console.error('Error al crear usuario:', error.message);
-      return res.status(500).json({
+      const status = error.name === 'SequelizeValidationError' ? 400 : 500;
+      return res.status(status).json({
         message: 'Error al crear el usuario',
         error: error.message,
       });
@@ -48,7 +62,10 @@ module.exports = {
         });
       }
 
-      return res.status(200).json(usuario);
+      const usuarioData = usuario.toJSON();
+      delete usuarioData.password;
+
+      return res.status(200).json(usuarioData);
     } catch (error) {
       return res.status(500).json({
         message: 'Error al buscar el usuario',
@@ -60,6 +77,7 @@ module.exports = {
   async list(req, res) {
     try {
       const usuarios = await tbc_usuario.findAll({
+        attributes: { exclude: ['password'] },
         order: [['id', 'ASC']],
       });
 
@@ -82,8 +100,43 @@ module.exports = {
         });
       }
 
-      await usuario.update(req.body);
-      return res.status(200).json(usuario);
+      const datos = { ...req.body };
+
+      if (datos.email) {
+        datos.email = datos.email.trim().toLowerCase();
+        const usuarioExistente = await tbc_usuario.findOne({
+          where: { email: datos.email }
+        });
+
+        if (usuarioExistente && usuarioExistente.id !== usuario.id) {
+          return res.status(409).json({
+            message: 'Ya existe otro usuario con ese email',
+          });
+        }
+      }
+
+      if (datos.nombre) {
+        datos.nombre = datos.nombre.trim();
+      }
+
+      if (datos.direccion) {
+        datos.direccion = datos.direccion.trim();
+      }
+
+      if (datos.telefono) {
+        datos.telefono = datos.telefono.trim();
+      }
+
+      if (datos.password) {
+        datos.password = await bcrypt.hash(datos.password, 10);
+      }
+
+      await usuario.update(datos);
+
+      const usuarioActualizado = usuario.toJSON();
+      delete usuarioActualizado.password;
+
+      return res.status(200).json(usuarioActualizado);
     } catch (error) {
       return res.status(500).json({
         message: 'Error al actualizar el usuario',
@@ -118,16 +171,14 @@ module.exports = {
     try {
       const { email, password } = req.body;
 
-      // Validar que se envíen email y contraseña
       if (!email || !password) {
         return res.status(400).json({
-          message: 'Email y contraseña son requeridos',
+          message: 'Email y password son requeridos',
         });
       }
 
-      // Buscar usuario por email
       const usuario = await tbc_usuario.findOne({
-        where: { email }
+        where: { email: email.trim().toLowerCase() }
       });
 
       if (!usuario) {
@@ -136,21 +187,19 @@ module.exports = {
         });
       }
 
-      // Comparar contraseña
       const passwordValida = await bcrypt.compare(password, usuario.password);
 
       if (!passwordValida) {
         return res.status(401).json({
-          message: 'Contraseña incorrecta',
+          message: 'Password incorrecto',
         });
       }
 
-      // Generar JWT
       const token = jwt.sign(
-        { 
-          id: usuario.id, 
+        {
+          id: usuario.id,
           email: usuario.email,
-          rol: usuario.rol 
+          rol: usuario.rol
         },
         process.env.JWT_SECRET || 'tu_clave_secreta_aqui',
         { expiresIn: '24h' }
